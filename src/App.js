@@ -1,25 +1,14 @@
-import logo from './logo.svg';
 import './App.css';
+import YoutubeList from './Component/youtube/YoutubeList';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <YoutubeList>
+        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Provident saepe recusandae beatae maiores optio, quis nam sequi omnis ducimus mollitia, non quos cupiditate ut dolor dolorum explicabo nisi vel veniam
+      </YoutubeList>
     </div>
-  );
+  )
 }
 
 export default App;
