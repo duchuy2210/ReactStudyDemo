@@ -18,8 +18,6 @@ const Game = () => {
     setBoard(Array(9).fill(null));
     setXIsNext(true);
   };
-  
-  console.log(winner);
   return (
     <div>
       <Board cells={board} onClick={handleClick}></Board>
