@@ -32,8 +32,8 @@ const SignUpPageStyles = styled.div`
 `;
 const SignUpPage = () => {
   const {
-    control,//control chứa các phương thức để đăng kí component với hook
-    handleSubmit,//handleSubmit sẽ thực hiện validate, nếu validate thành công sẽ gọi hàm thực thi bên trong nó
+    control, //control chứa các phương thức để đăng kí component với hook
+    handleSubmit, //handleSubmit sẽ thực hiện validate, nếu validate thành công sẽ gọi hàm thực thi bên trong nó
     formState: { errors, isValid, isSubmitting },
     watch,
   } = useForm();
