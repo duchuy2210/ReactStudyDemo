@@ -45,7 +45,6 @@ const Input = ({
     name,
     defaultValue: '',
   });
-  console.log(control);
   return (
     <InputStyle hasIcon={children ? true : false}>
       <input id={name} type={type} {...field} {...props} />
