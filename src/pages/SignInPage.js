@@ -6,27 +6,28 @@ import { IconEyeClose, IconEyeOpen } from 'Components/icon';
 import Input from 'Components/input';
 import Label from 'Components/label';
 import { useAuth } from 'context/auth-context';
+import { auth } from 'database/firebase-config';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import AuthenticationPage from './AuthenticationPage';
 
-const SignInPageStyles = styled.div``;
 const SignInPage = () => {
+  //Khai baó sử dụng auth để phân quyền cho hiện thông tin không
   const { userInfo } = useAuth();
-  console.log('userInfo:', userInfo);
   const navigate = useNavigate();
   const [togglePassword, setTogglePassword] = useState(false);
 
   useEffect(() => {
-    // if (userInfo?.email) navigate('/');
-  }, [userInfo]);
+    document.title = "Login Page"
+    if (userInfo?.email) navigate('/');
+  }, []);
 
   //Tạo schema validate cho từng giá trị
   const schema = yup.object({
-    fullname: yup.string().required('Please enter your full name'),
     email: yup
       .string()
       .email('Please enter valid email address')
@@ -36,6 +37,7 @@ const SignInPage = () => {
       .min(8, 'Your password must be at least 8 character')
       .required('Please enter your password'),
   });
+
   //Sử dụng useForm với form trong component này
   const {
     control, //control chứa các phương thức để đăng kí component với hook
@@ -46,8 +48,24 @@ const SignInPage = () => {
     // Khai báo validate vào trong form
     resolver: yupResolver(schema),
   });
-  const handleSignIn = async values => {
 
+   //Xử lý hiện message validation
+  useEffect(() => {
+    const arrErrors = Object.values(errors);
+    if (arrErrors.length > 0) {
+      toast.error(arrErrors[0]?.message, {
+        pauseOnHover: false,
+        delay: 0,
+      });
+    }
+  }, [errors]);
+
+  //Khi sign in
+  const handleSignIn = async values => {
+    if (!isValid) return;
+  await signInWithEmailAndPassword(auth,values.email,values.password)
+    toast.success('Sign in Success');
+    navigate("/")
   };
   return (
     <AuthenticationPage>
@@ -79,6 +97,7 @@ const SignInPage = () => {
             )}
           </Input>
         </Field>
+        <div className='have-account'><NavLink to={"/sign-up"}>Don't have an account yet?</NavLink></div>
         <Button
           type="submit"
           style={{ width: 300 }}

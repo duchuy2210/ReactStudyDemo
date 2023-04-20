@@ -11,13 +11,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { toast } from 'react-toastify';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, dataBase } from 'database/firebase-config';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { addDoc, collection } from 'firebase/firestore';
 import AuthenticationPage from './AuthenticationPage';
 
-const SignUpPageStyles = styled.div`
-
-`;
 //Tạo schema validate cho từng giá trị
 const schema = yup.object({
   fullname: yup.string().required('Please enter your full name'),
@@ -60,7 +57,6 @@ const SignUpPage = () => {
   //Khi submit
   const handleSignUp = async values => {
     if (!isValid) return;
-    console.log('values:', values);
     //Tạo user Authenticate mới khi bấm Sign Up
     await createUserWithEmailAndPassword(auth, values.email, values.password);
     //Thêm vào firestore db
@@ -116,6 +112,7 @@ const SignUpPage = () => {
               )}
             </Input>
           </Field>
+          <div className='have-account'><NavLink to={"/sign-in"}>Already have an account?</NavLink></div>
           <Button
             type="submit"
             style={{ width: 300 }}
