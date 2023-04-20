@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 const HeaderStyle = styled.div`
+  margin: 20px 0;
   .header-main {
     display: flex;
     align-items: center;
@@ -15,6 +16,7 @@ const HeaderStyle = styled.div`
       .logo {
         display: block;
         max-width: 50px;
+        margin-right: 30px;
       }
       .menu {
         display: flex;

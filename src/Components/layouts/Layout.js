@@ -1,4 +1,4 @@
-import React, { Children, Fragment } from 'react';
+import React, {  Fragment } from 'react';
 import Footer from './Footer';
 import Header from './Header';
 

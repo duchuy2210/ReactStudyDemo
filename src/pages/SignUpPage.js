@@ -1,6 +1,5 @@
 import Input from 'Components/input';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import Label from 'Components/label';
 import { useForm } from 'react-hook-form';
 import { IconEyeOpen, IconEyeClose } from 'Components/icon';
