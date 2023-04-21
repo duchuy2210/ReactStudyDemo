@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-const IconEyeClose = ({ className = '', onClick = () => {} }) => {
+const IconEyeClose = ({ className = "", onClick = () => {} }) => {
   return (
     <span className={className} onClick={onClick}>
       <svg
@@ -8,7 +8,8 @@ const IconEyeClose = ({ className = '', onClick = () => {} }) => {
         height="20"
         viewBox="0 0 22 20"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg">
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <path
           d="M13.5356 8.46454C13.7677 8.69669 13.9519 8.97229 14.0775 9.27561C14.2032 9.57892 14.2678 9.90401 14.2678 10.2323C14.2678 10.5606 14.2031 10.8857 14.0775 11.189C13.9518 11.4923 13.7677 11.7679 13.5355 12.0001C13.3034 12.2322 13.0278 12.4164 12.7245 12.542C12.4211 12.6676 12.0961 12.7323 11.7678 12.7323C11.4394 12.7323 11.1144 12.6676 10.811 12.5419C10.5077 12.4163 10.2321 12.2322 10 12"
           stroke="#999999"

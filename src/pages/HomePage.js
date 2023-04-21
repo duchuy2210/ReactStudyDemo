@@ -1,11 +1,12 @@
-import Layout from 'Components/layouts/Layout';
-import HomeBanner from 'modules/home/HomeBanner';
-import HomeFeature from 'modules/home/HomeFeature';
-import HomeNewest from 'modules/home/HomeNewest';
-import React from 'react';
-import styled from 'styled-components';
+import Layout from "components/layout/Layout";
+import HomeBanner from "module/home/HomeBanner";
+import HomeFeature from "module/home/HomeFeature";
+import HomeNewest from "module/home/HomeNewest";
+import React from "react";
+import styled from "styled-components";
 
 const HomePageStyles = styled.div``;
+
 const HomePage = () => {
   return (
     <HomePageStyles>

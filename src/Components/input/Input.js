@@ -1,21 +1,22 @@
-import React from 'react';
-import { useController } from 'react-hook-form';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
+import { useController } from "react-hook-form";
 
-const InputStyle = styled.div`
+const InputStyles = styled.div`
   position: relative;
   width: 100%;
   input {
     width: 100%;
-    border: 2px solid transparent;
-    font-size: 16px;
-    border-radius: 10px;
-    background-color: #e7ecf3;
-    padding: ${props => (props.hasIcon ? '15px 60px 15px 15px' : '15px')};
+    padding: ${(props) => (props.hasIcon ? "20px 60px 20px 20px" : "20px")};
+    background-color: ${(props) => props.theme.grayLight};
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s linear;
+    border: 1px solid transparent;
   }
   input:focus {
-    border: 2px solid ${props => props.theme.primary};
-    background-color: #fff;
+    background-color: white;
+    border-color: ${(props) => props.theme.primary};
   }
   input::-webkit-input-placeholder {
     color: #84878b;
@@ -29,27 +30,19 @@ const InputStyle = styled.div`
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    padding: 5px;
   }
 `;
-
-const Input = ({
-  name,
-  type,
-  children, //children để khi handle việc icon cho xem password
-  control, //control chứa các phương thức để đăng kí component với hook
-  ...props
-}) => {
+const Input = ({ name = "", type = "text", children, control, ...props }) => {
   const { field } = useController({
     control,
     name,
-    defaultValue: '',
+    defaultValue: "",
   });
   return (
-    <InputStyle hasIcon={children ? true : false}>
+    <InputStyles hasIcon={children ? true : false}>
       <input id={name} type={type} {...field} {...props} />
-      {children}
-    </InputStyle>
+      {children ? <div className="input-icon">{children}</div> : null}
+    </InputStyles>
   );
 };
 
