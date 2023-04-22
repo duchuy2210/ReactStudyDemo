@@ -4,7 +4,7 @@ import { Dropdown } from 'components/dropdown';
 import { Field } from 'components/field';
 import { Input } from 'components/input';
 import { Label } from 'components/label';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import slugify from 'slugify';
 import styled from 'styled-components';
@@ -13,53 +13,97 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
+  deleteObject,
 } from 'firebase/storage';
 import { postStatus } from 'utils/constants';
+import ImageUpload from 'components/image/ImageUpload';
+import { collection } from 'firebase/firestore';
+import { db } from 'firebase-app/firebase-config';
+import { toast } from 'react-toastify';
 const PostAddNewStyles = styled.div``;
 
 const PostAddNew = () => {
   //Lấy storage
-  const { control, watch, setValue, handleSubmit } = useForm({
+  const storage = getStorage();
+
+  //Kết nối đến collection posts
+  const colRef = collection(db, 'posts');
+
+  const { control, watch, setValue, handleSubmit, getValues } = useForm({
     mode: 'onChange',
     defaultValues: {
-      title: "",
-      slug: "",
+      title: '',
+      slug: '',
       status: 2,
-      image: "",
+      image: '',
       category: {},
       user: {},
     },
   });
+
+  //Theo giỏi sự thay đổi
   const watchStatus = watch('status');
   const watchCategory = watch('category');
-  console.log('PostAddNew ~ watchStatus', watchStatus);
 
   //Handle add new posts
   const addPostHandler = values => {
-    const cloneValues = {...values}
+    const cloneValues = { ...values };
     cloneValues.slug = slugify(values.slug || values.title);
-    cloneValues.status = Number(values.status)
-    console.log('values:', cloneValues);
+    cloneValues.status = Number(values.status);
+    // handleUploadImage(cloneValues.image);
+  };
+
+  //Tạo state để handle progress chạy upload ảnh
+  const [progress, setProgress] = useState(0);
+  //State khi upload xong thì hiện ảnh lên chổ label input
+  const [image, setImage] = useState('');
+
+  //onSelect IMG
+  const onSelectImage = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setValue('image_name', file.name);
+    handleUploadImage(file);
+  };
+
+  //Delete images
+  const handleDeleteImage = () => {
+    const storage = getStorage();
+
+    // Create a reference to the file to delete
+    const imageRef = ref(storage, 'images/' + getValues('image_name'));
+
+    // Delete the file
+    deleteObject(imageRef)
+      .then(() => {
+        toast.success('Deleted successfully');
+        setImage('');
+        setProgress(0);
+      })
+      .catch(error => {
+        toast.error('Failure to delete');
+      });
   };
 
   //Handle Upload File Image
-  const handleUploadImage = e => {
+  const handleUploadImage = file => {
     const storage = getStorage();
-    const file = e.target.files[0];
-    console.log('file:', file);
-    if (!file) return;
+    const metadata = {
+      contentType: 'image/jpeg',
+    };
     // Upload file to the object 'images/'
     const storageRef = ref(storage, 'images/' + file.name);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    const uploadTask = uploadBytesResumable(storageRef, file, metadata);
 
     // Listen for state changes, errors, and completion of the upload.
     uploadTask.on(
       'state_changed',
       snapshot => {
         // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-        const progress =
+        const progressPercent =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
+        setProgress(progressPercent);
+        // console.log('Upload is ' + progressPercent + '% done');
         switch (snapshot.state) {
           case 'paused':
             console.log('Upload is paused');
@@ -75,9 +119,11 @@ const PostAddNew = () => {
         console.log('Upload error: ' + error);
       },
       () => {
-        // Upload completed successfully, now we can get the download URL
+        // Upload completed successfully, now we can get the download URL and show image
         getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
-          console.log('File available at', downloadURL);
+          // console.log('File available at', downloadURL);
+          toast.success('Upload successfully');
+          setImage(downloadURL);
         });
       }
     );
@@ -106,7 +152,12 @@ const PostAddNew = () => {
         <div className="grid grid-cols-2 gap-x-10 mb-10">
           <Field>
             <Label>Image</Label>
-            <input type="file" name="image " onChange={handleUploadImage} />
+            <ImageUpload
+              onChange={onSelectImage}
+              handleDeleteImage={handleDeleteImage}
+              className="h-[250px] bg-gray-100"
+              progress={progress}
+              image={image}></ImageUpload>
           </Field>
           <Field>
             <Label>Status</Label>
