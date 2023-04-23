@@ -3,6 +3,7 @@ Collections: post
   - title
   - slug
   - mage
+  - hot (true or false)
   - createAt
   - status: 1(approved) 2(pending) 3(reject)
   - content

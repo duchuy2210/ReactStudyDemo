@@ -1,33 +1,24 @@
 import { Button } from 'components/button';
-import { Checkbox, Radio } from 'components/checkbox';
-import { Dropdown } from 'components/dropdown';
+import { Radio } from 'components/checkbox';
 import { Field } from 'components/field';
 import { Input } from 'components/input';
 import { Label } from 'components/label';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import slugify from 'slugify';
 import styled from 'styled-components';
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
 import { postStatus } from 'utils/constants';
 import ImageUpload from 'components/image/ImageUpload';
-import { collection } from 'firebase/firestore';
+import useFirebaseImage from 'hooks/useFirebaseImage';
+import Toggle from 'components/toggle/Toggle';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from 'firebase-app/firebase-config';
-import { toast } from 'react-toastify';
+import { Dropdown } from 'components/dropdown';
 const PostAddNewStyles = styled.div``;
 
 const PostAddNew = () => {
-  //Lấy storage
-  const storage = getStorage();
-
   //Kết nối đến collection posts
-  const colRef = collection(db, 'posts');
+  // const colRef = collection(db, 'posts');
 
   const { control, watch, setValue, handleSubmit, getValues } = useForm({
     mode: 'onChange',
@@ -35,98 +26,50 @@ const PostAddNew = () => {
       title: '',
       slug: '',
       status: 2,
+      hot: false,
       image: '',
-      category: {},
+      categoryId: '',
       user: {},
     },
   });
 
   //Theo giỏi sự thay đổi
   const watchStatus = watch('status');
-  const watchCategory = watch('category');
+  const watchHot = watch('hot');
+  // const watchCategory = watch('category');
+
+  const [categories, setCategories] = useState([]);
+  //Lấy collection categories từ db
+  useEffect(() => {
+    async function getData() {
+      const colRef = collection(db, 'categories');
+      //query lấy ra status
+      const q = query(colRef, where('status', '==', 1));
+      const querySnapshot = await getDocs(q);
+      let result = [];
+      querySnapshot.forEach(doc => {
+        // doc.data() is never undefined for query doc snapshots
+        // console.log(doc.id, ' => ', doc.data());
+        result.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+        setCategories(result);
+      });
+    }
+    getData();
+  }, []);
+
+  const { image, progress, handleSelectImage, handleDeleteImage } =
+    useFirebaseImage(setValue, getValues);
 
   //Handle add new posts
   const addPostHandler = values => {
     const cloneValues = { ...values };
     cloneValues.slug = slugify(values.slug || values.title);
     cloneValues.status = Number(values.status);
+    console.log('cloneValues:', cloneValues);
     // handleUploadImage(cloneValues.image);
-  };
-
-  //Tạo state để handle progress chạy upload ảnh
-  const [progress, setProgress] = useState(0);
-  //State khi upload xong thì hiện ảnh lên chổ label input
-  const [image, setImage] = useState('');
-
-  //onSelect IMG
-  const onSelectImage = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setValue('image_name', file.name);
-    handleUploadImage(file);
-  };
-
-  //Delete images
-  const handleDeleteImage = () => {
-    const storage = getStorage();
-
-    // Create a reference to the file to delete
-    const imageRef = ref(storage, 'images/' + getValues('image_name'));
-
-    // Delete the file
-    deleteObject(imageRef)
-      .then(() => {
-        toast.success('Deleted successfully');
-        setImage('');
-        setProgress(0);
-      })
-      .catch(error => {
-        toast.error('Failure to delete');
-      });
-  };
-
-  //Handle Upload File Image
-  const handleUploadImage = file => {
-    const storage = getStorage();
-    const metadata = {
-      contentType: 'image/jpeg',
-    };
-    // Upload file to the object 'images/'
-    const storageRef = ref(storage, 'images/' + file.name);
-    const uploadTask = uploadBytesResumable(storageRef, file, metadata);
-
-    // Listen for state changes, errors, and completion of the upload.
-    uploadTask.on(
-      'state_changed',
-      snapshot => {
-        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-        const progressPercent =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setProgress(progressPercent);
-        // console.log('Upload is ' + progressPercent + '% done');
-        switch (snapshot.state) {
-          case 'paused':
-            console.log('Upload is paused');
-            break;
-          case 'running':
-            console.log('Upload is running');
-            break;
-          default:
-            console.log('Nothing at all');
-        }
-      },
-      error => {
-        console.log('Upload error: ' + error);
-      },
-      () => {
-        // Upload completed successfully, now we can get the download URL and show image
-        getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
-          // console.log('File available at', downloadURL);
-          toast.success('Upload successfully');
-          setImage(downloadURL);
-        });
-      }
-    );
   };
 
   return (
@@ -153,11 +96,38 @@ const PostAddNew = () => {
           <Field>
             <Label>Image</Label>
             <ImageUpload
-              onChange={onSelectImage}
+              onChange={handleSelectImage}
               handleDeleteImage={handleDeleteImage}
               className="h-[250px] bg-gray-100"
               progress={progress}
               image={image}></ImageUpload>
+          </Field>
+          <Field>
+            <Label>Category</Label>
+            {/* Sử dụng làm dropdown theo kiểu pattern compound components */}
+            <Dropdown>
+              <Dropdown.Select></Dropdown.Select>
+              <Dropdown.List>
+                {categories.length > 0 &&
+                  categories.map((category, index) => (
+                    <Dropdown.Option key={index} onClick={()=>setValue("categoryId",category.id)}>
+                      {category.name}
+                    </Dropdown.Option>
+                  ))}
+              </Dropdown.List>
+            </Dropdown>
+          </Field>
+          {/* <Field>
+            <Label>Author</Label>
+            <Input control={control} placeholder="Find the author"></Input>
+          </Field> */}
+        </div>
+        <div className="grid grid-cols-2 gap-x-10 mb-10">
+          <Field>
+            <Label>Feature</Label>
+            <Toggle
+              on={watchHot === true}
+              onClick={() => setValue('hot', !watchHot)}></Toggle>
           </Field>
           <Field>
             <Label>Status</Label>
@@ -185,23 +155,6 @@ const PostAddNew = () => {
               </Radio>
             </div>
           </Field>
-          <Field>
-            <Label>Author</Label>
-            <Input control={control} placeholder="Find the author"></Input>
-          </Field>
-        </div>
-        <div className="grid grid-cols-2 gap-x-10 mb-10">
-          <Field>
-            <Label>Category</Label>
-            <Dropdown>
-              <Dropdown.Option>Knowledge</Dropdown.Option>
-              <Dropdown.Option>Blockchain</Dropdown.Option>
-              <Dropdown.Option>Setup</Dropdown.Option>
-              <Dropdown.Option>Nature</Dropdown.Option>
-              <Dropdown.Option>Developer</Dropdown.Option>
-            </Dropdown>
-          </Field>
-          <Field></Field>
         </div>
         <Button type="submit" className="mx-auto">
           Add new post

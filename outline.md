@@ -13,7 +13,7 @@
 
 12. Details UI
 13. Dashboard UI
-14. Add post Form
+14. Add post Form : overview, upload image, delete image, toggle hot, find category
 15. Routing dynamic import
 16. Update post Form
 17. Table UI
