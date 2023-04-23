@@ -11,25 +11,29 @@ import { postStatus } from 'utils/constants';
 import ImageUpload from 'components/image/ImageUpload';
 import useFirebaseImage from 'hooks/useFirebaseImage';
 import Toggle from 'components/toggle/Toggle';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from 'firebase-app/firebase-config';
 import { Dropdown } from 'components/dropdown';
+import { useAuth } from 'contexts/auth-context';
+import { toast } from 'react-toastify';
 const PostAddNewStyles = styled.div``;
 
 const PostAddNew = () => {
   //Kết nối đến collection posts
   // const colRef = collection(db, 'posts');
+  const { userInfo } = useAuth();
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory,setSelectedCategory] = useState("")
 
-  const { control, watch, setValue, handleSubmit, getValues } = useForm({
+  const { control, watch, setValue, handleSubmit, getValues, reset } = useForm({
     mode: 'onChange',
     defaultValues: {
       title: '',
       slug: '',
       status: 2,
       hot: false,
-      image: '',
+      image_name: '',
       categoryId: '',
-      user: {},
     },
   });
 
@@ -38,7 +42,10 @@ const PostAddNew = () => {
   const watchHot = watch('hot');
   // const watchCategory = watch('category');
 
-  const [categories, setCategories] = useState([]);
+  //
+  const { image, progress, handleSelectImage, handleDeleteImage } =
+    useFirebaseImage(setValue, getValues);
+
   //Lấy collection categories từ db
   useEffect(() => {
     async function getData() {
@@ -60,18 +67,36 @@ const PostAddNew = () => {
     getData();
   }, []);
 
-  const { image, progress, handleSelectImage, handleDeleteImage } =
-    useFirebaseImage(setValue, getValues);
-
   //Handle add new posts
-  const addPostHandler = values => {
+  const addPostHandler = async values => {
+    //set lại các giá trị vào cloneValues để kh ảnh hưởng tới values
     const cloneValues = { ...values };
-    cloneValues.slug = slugify(values.slug || values.title);
+    cloneValues.slug = slugify(values.slug || values.title, { lower: true });
     cloneValues.status = Number(values.status);
     console.log('cloneValues:', cloneValues);
-    // handleUploadImage(cloneValues.image);
+    const colRef = collection(db, 'posts');
+    await addDoc(colRef, {
+      ...cloneValues,
+      image,
+      userId: userInfo.uid,
+    });
+    toast.success('created new post successfully');
+    //Sau khi post thành công sẽ reset lại các giá trị
+    reset({
+      title: '',
+      slug: '',
+      status: 2,
+      hot: false,
+      image_name: '',
+      categoryId: '',
+      image: '',
+    });
+    setSelectedCategory("");
   };
-
+  const handleCategoryDisplay = (category)=>{
+    setValue('categoryId', category.id);
+    setSelectedCategory(category.name)
+  }
   return (
     <PostAddNewStyles>
       <h1 className="dashboard-heading">Add new post</h1>
@@ -106,11 +131,13 @@ const PostAddNew = () => {
             <Label>Category</Label>
             {/* Sử dụng làm dropdown theo kiểu pattern compound components */}
             <Dropdown>
-              <Dropdown.Select></Dropdown.Select>
+              <Dropdown.Select placeholder={selectedCategory?selectedCategory:"Please select an option"}></Dropdown.Select>
               <Dropdown.List>
                 {categories.length > 0 &&
                   categories.map((category, index) => (
-                    <Dropdown.Option key={index} onClick={()=>setValue("categoryId",category.id)}>
+                    <Dropdown.Option
+                      key={index}
+                      onClick={() => handleCategoryDisplay(category)}>
                       {category.name}
                     </Dropdown.Option>
                   ))}
