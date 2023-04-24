@@ -11,7 +11,14 @@ import { postStatus } from 'utils/constants';
 import ImageUpload from 'components/image/ImageUpload';
 import useFirebaseImage from 'hooks/useFirebaseImage';
 import Toggle from 'components/toggle/Toggle';
-import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  serverTimestamp,
+  where,
+} from 'firebase/firestore';
 import { db } from 'firebase-app/firebase-config';
 import { Dropdown } from 'components/dropdown';
 import { useAuth } from 'contexts/auth-context';
@@ -23,7 +30,8 @@ const PostAddNew = () => {
   // const colRef = collection(db, 'posts');
   const { userInfo } = useAuth();
   const [categories, setCategories] = useState([]);
-  const [selectedCategory,setSelectedCategory] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const { control, watch, setValue, handleSubmit, getValues, reset } = useForm({
     mode: 'onChange',
@@ -34,6 +42,10 @@ const PostAddNew = () => {
       hot: false,
       image_name: '',
       categoryId: '',
+      image: '',
+      userId: '',
+      //note bug: serverTimestamp là 1 func
+      createdAt: serverTimestamp(),
     },
   });
 
@@ -42,9 +54,14 @@ const PostAddNew = () => {
   const watchHot = watch('hot');
   // const watchCategory = watch('category');
 
-  //
-  const { image, progress, handleSelectImage, handleDeleteImage } =
-    useFirebaseImage(setValue, getValues);
+  //handle upload image and render UI when post image
+  let {
+    image,
+    progress,
+    handleSelectImage,
+    handleDeleteImage,
+    handleResetImage,
+  } = useFirebaseImage(setValue, getValues);
 
   //Lấy collection categories từ db
   useEffect(() => {
@@ -67,36 +84,49 @@ const PostAddNew = () => {
     getData();
   }, []);
 
+  //
+  useEffect(() => {
+    document.title = 'Add new posts';
+  },[])
+
   //Handle add new posts
   const addPostHandler = async values => {
     //set lại các giá trị vào cloneValues để kh ảnh hưởng tới values
-    const cloneValues = { ...values };
-    cloneValues.slug = slugify(values.slug || values.title, { lower: true });
-    cloneValues.status = Number(values.status);
-    console.log('cloneValues:', cloneValues);
-    const colRef = collection(db, 'posts');
-    await addDoc(colRef, {
-      ...cloneValues,
-      image,
-      userId: userInfo.uid,
-    });
-    toast.success('created new post successfully');
-    //Sau khi post thành công sẽ reset lại các giá trị
-    reset({
-      title: '',
-      slug: '',
-      status: 2,
-      hot: false,
-      image_name: '',
-      categoryId: '',
-      image: '',
-    });
-    setSelectedCategory("");
+    setLoading(true);
+    try {
+      const cloneValues = { ...values };
+      cloneValues.slug = slugify(values.slug || values.title, { lower: true });
+      cloneValues.status = Number(values.status);
+      const colRef = collection(db, 'posts');
+      await addDoc(colRef, {
+        ...cloneValues,
+        image,
+        userId: userInfo.uid,
+      });
+      console.log('cloneValues:', cloneValues);
+      toast.success('created new post successfully');
+      //Sau khi post thành công sẽ reset lại các giá trị
+      reset({
+        title: '',
+        slug: '',
+        status: 2,
+        hot: false,
+        image_name: '',
+        categoryId: '',
+        image: '',
+      });
+      handleResetImage();
+      setSelectedCategory('');
+    } catch (error) {
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
-  const handleCategoryDisplay = (category)=>{
+  const handleCategoryDisplay = category => {
     setValue('categoryId', category.id);
-    setSelectedCategory(category.name)
-  }
+    setSelectedCategory(category.name);
+  };
   return (
     <PostAddNewStyles>
       <h1 className="dashboard-heading">Add new post</h1>
@@ -131,7 +161,12 @@ const PostAddNew = () => {
             <Label>Category</Label>
             {/* Sử dụng làm dropdown theo kiểu pattern compound components */}
             <Dropdown>
-              <Dropdown.Select placeholder={selectedCategory?selectedCategory:"Please select an option"}></Dropdown.Select>
+              <Dropdown.Select
+                placeholder={
+                  selectedCategory
+                    ? selectedCategory
+                    : 'Please select an option'
+                }></Dropdown.Select>
               <Dropdown.List>
                 {categories.length > 0 &&
                   categories.map((category, index) => (
@@ -183,7 +218,11 @@ const PostAddNew = () => {
             </div>
           </Field>
         </div>
-        <Button type="submit" className="mx-auto">
+        <Button
+          type="submit"
+          className="mx-auto w-[250px]"
+          isLoading={loading}
+          disable={loading}>
           Add new post
         </Button>
       </form>

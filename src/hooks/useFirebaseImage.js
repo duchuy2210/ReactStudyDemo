@@ -2,18 +2,24 @@
  * Customs hooks sử dụng cho post và delete images ở PostAddNew.js
  */
 
-import { deleteObject, getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
-import { useState } from "react";
-import { toast } from "react-toastify";
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from 'firebase/storage';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 
-export default function useFirebaseImage(setValue,getValues){
-    //Tạo state để handle progress chạy upload ảnh
+export default function useFirebaseImage(setValue, getValues) {
+  //Tạo state để handle progress chạy upload ảnh
   const [progress, setProgress] = useState(0);
   //State khi upload xong thì hiện ảnh lên chổ label input
   const [image, setImage] = useState('');
 
   //Kiểm tra 2 tham số
-  if(!setValue || !setValue) return;
+  if (!setValue || !setValue) return;
 
   //onSelect IMG
   const handleSelectImage = e => {
@@ -26,7 +32,7 @@ export default function useFirebaseImage(setValue,getValues){
   //Delete images
   const handleDeleteImage = () => {
     const storage = getStorage();
-    console.log(getValues('image_name'))
+    console.log(getValues('image_name'));
     // Create a reference to the file to delete
     const imageRef = ref(storage, 'images/' + getValues('image_name'));
 
@@ -85,5 +91,15 @@ export default function useFirebaseImage(setValue,getValues){
       }
     );
   };
-  return {image, progress, handleSelectImage, handleDeleteImage};
+  const handleResetImage = () => {
+    setImage('');
+    setProgress(0);
+  };
+  return {
+    image,
+    progress,
+    handleSelectImage,
+    handleDeleteImage,
+    handleResetImage,
+  };
 }
