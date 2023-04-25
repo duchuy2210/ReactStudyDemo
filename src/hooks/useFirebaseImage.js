@@ -99,7 +99,7 @@ export default function useFirebaseImage(setValue, getValues) {
     image,
     progress,
     handleSelectImage,
-    handleDeleteImage,
+     handleDeleteImage,
     handleResetImage,
   };
 }

@@ -45,7 +45,7 @@ const PostAddNew = () => {
       image: '',
       userId: '',
       //note bug: serverTimestamp là 1 func
-      createdAt: serverTimestamp(),
+      createdAt: new Date(),
     },
   });
 
@@ -102,6 +102,7 @@ const PostAddNew = () => {
         ...cloneValues,
         image,
         userId: userInfo.uid,
+        createdAt: serverTimestamp(),
       });
       console.log('cloneValues:', cloneValues);
       toast.success('created new post successfully');

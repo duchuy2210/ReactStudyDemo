@@ -12,6 +12,7 @@ Collections: post
 
 Collections : Category
   - id
+  - name
   - title
   - slug
   - status: 1(approved) 2(pending)
