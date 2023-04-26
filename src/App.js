@@ -4,6 +4,7 @@ import CategoryUpdate from "module/category/CategoryUpdate";
 import DashboardLayout from "module/dashboard/DashboardLayout";
 import PostAddNew from "module/post/PostAddNew";
 import PostManage from "module/post/PostManage";
+import UserManage from "module/user/UserManage";
 import DashboardPage from "pages/DashboardPage";
 import HomePage from "pages/HomePage";
 import NotFoundPage from "pages/NotFoundPage";
@@ -43,6 +44,10 @@ function App() {
             <Route
               path="/manage/category"
               element={<CategoryManage></CategoryManage>}
+            ></Route>
+            <Route
+              path="/manage/user"
+              element={<UserManage></UserManage>}
             ></Route>
             <Route
               path="/manage/post"

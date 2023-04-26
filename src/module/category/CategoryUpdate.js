@@ -1,4 +1,3 @@
-import { async } from '@firebase/util';
 import { Button } from 'components/button';
 import { Radio } from 'components/checkbox';
 import { Field, FieldCheckboxes } from 'components/field';
@@ -39,6 +38,7 @@ const CategoryUpdate = () => {
   }, [categoryId, reset]);
   const watchStatus = watch('status');
   const handleUpdateCategory = async values => {
+    if (!isValid) return;
     //XỬ LÝ DỮ LIỆU
     const cloneValues = { ...values };
     cloneValues.slug = slugify(values.slug || values.name, { lower: true });
