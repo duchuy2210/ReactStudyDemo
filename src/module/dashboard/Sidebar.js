@@ -1,6 +1,8 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import styled from "styled-components";
+import { auth } from 'firebase-app/firebase-config';
+import { signOut } from 'firebase/auth';
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
 const SidebarStyles = styled.div`
   width: 300px;
   background: #ffffff;
@@ -23,20 +25,20 @@ const SidebarStyles = styled.div`
     gap: 20px;
     padding: 14px 20px;
     font-weight: 500;
-    color: ${(props) => props.theme.gray80};
+    color: ${props => props.theme.gray80};
     margin-bottom: 20px;
     cursor: pointer;
     &.active,
     &:hover {
       background: #f1fbf7;
-      color: ${(props) => props.theme.primary};
+      color: ${props => props.theme.primary};
     }
   }
 `;
 const sidebarLinks = [
   {
-    title: "Dashboard",
-    url: "/dashboard",
+    title: 'Dashboard',
+    url: '/dashboard',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -44,8 +46,7 @@ const sidebarLinks = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-        strokeWidth="2"
-      >
+        strokeWidth="2">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -55,8 +56,8 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "Post",
-    url: "/manage/post",
+    title: 'Post',
+    url: '/manage/post',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -64,8 +65,7 @@ const sidebarLinks = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-        strokeWidth="2"
-      >
+        strokeWidth="2">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -75,8 +75,8 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "Category",
-    url: "/manage/category",
+    title: 'Category',
+    url: '/manage/category',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -84,8 +84,7 @@ const sidebarLinks = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-        strokeWidth="2"
-      >
+        strokeWidth="2">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -95,8 +94,8 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "User",
-    url: "/manage/user",
+    title: 'User',
+    url: '/manage/user',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -104,8 +103,7 @@ const sidebarLinks = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-        strokeWidth="2"
-      >
+        strokeWidth="2">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -115,8 +113,8 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "Logout",
-    url: "/",
+    title: 'Logout',
+    url: '/manage/add-post',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -124,8 +122,7 @@ const sidebarLinks = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-        strokeWidth="2"
-      >
+        strokeWidth="2">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -133,7 +130,10 @@ const sidebarLinks = [
         />
       </svg>
     ),
-    onClick: () => {},
+    //HANDLE SIGN OUT
+    onClick: () => {
+      signOut(auth);
+    },
   },
 ];
 const Sidebar = () => {
@@ -143,12 +143,21 @@ const Sidebar = () => {
         <img srcSet="/logo.png 2x" alt="" />
         <span>Monkey Blogging</span>
       </div>
-      {sidebarLinks.map((link) => (
-        <NavLink to={link.url} className="menu-item" key={link.title}>
-          <span className="menu-icon">{link.icon}</span>
-          <span className="menu-text">{link.title}</span>
-        </NavLink>
-      ))}
+      {sidebarLinks.map(link => {
+        if (link.onClick)
+          return (
+            <div key={link.title} className="menu-item" onClick={link.onClick}>
+              <span className="menu-icon">{link.icon}</span>
+              <span className="menu-text">{link.title}</span>
+            </div>
+          );
+        return (
+          <NavLink to={link.url} className="menu-item" key={link.title}>
+            <span className="menu-icon">{link.icon}</span>
+            <span className="menu-text">{link.title}</span>
+          </NavLink>
+        );
+      })}
     </SidebarStyles>
   );
 };

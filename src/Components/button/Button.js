@@ -77,6 +77,7 @@ const Button = ({
 };
 
 Button.propTypes = {
+  alo: PropTypes.bool,
   type: PropTypes.oneOf(['button', 'submit']),
   isLoading: PropTypes.bool,
   onClick: PropTypes.func,

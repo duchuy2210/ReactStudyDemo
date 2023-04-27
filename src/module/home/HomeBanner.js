@@ -66,7 +66,7 @@ const HomeBanner = () => {
               Quaerat voluptates possimus dolorem officiis pariatur, repellat,
               cupiditate porro, quidem molestiae impedit laudantium neque quo!
             </p>
-            <Button to="/sign-up" kind="secondary" className="banner-button">
+            <Button to="/dashboard" kind="secondary" className="banner-button">
               Get started
             </Button>
           </div>

@@ -1,13 +1,24 @@
 import { ActionDelete, ActionEdit, ActionView } from 'components/action';
+import { LabelStatus } from 'components/label';
 import { Table } from 'components/table';
 import { db } from 'firebase-app/firebase-config';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { deleteUser } from 'firebase/auth';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  where,
+} from 'firebase/firestore';
 import { debounce } from 'lodash';
 import DashboardHeading from 'module/dashboard/DashboardHeading';
 import React from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { userRole, userStatus } from 'utils/constants';
 
 const UserManage = () => {
   const navigate = useNavigate();
@@ -45,8 +56,52 @@ const UserManage = () => {
     setFilter(e.target.value);
   }, 500);
 
+  //HANDLE SHOW ROLE USER
+  const userRoleLabel = role => {
+    switch (role) {
+      case userRole.ADMIN:
+        return 'ADMIN';
+      case userRole.MOD:
+        return 'MOD';
+      case userRole.USER:
+        return 'USER';
+      default:
+        break;
+    }
+  };
+  //HANDLE SHOW STATUS USER
+  const userStatusLabel = status => {
+    switch (status) {
+      case userStatus.ACTIVE:
+        return <LabelStatus type="success">Active</LabelStatus>;
+      case userStatus.PENDING:
+        return <LabelStatus type="warning">Active</LabelStatus>;
+      case userStatus.BAN:
+        return <LabelStatus type="danger">Active</LabelStatus>;
+      default:
+        break;
+    }
+  };
+
   //XOÁ USER
-  const handleDeleteUser = () => {};
+  const handleDeleteUser = user => {
+    const singleDoc = doc(db, 'users', user.id);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then(async result => {
+      if (result.isConfirmed) {
+        await deleteDoc(singleDoc);
+        Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+      }
+    });
+  };
+
   return (
     <div>
       <DashboardHeading
@@ -83,31 +138,32 @@ const UserManage = () => {
                   <div className="flex gap-2 items-center justify-center">
                     <img
                       className="w-20 h-20 flex-shrink-0 object-cover rounded-sm"
-                      src="https://mimosawedding.net/wp-content/uploads/2020/05/cach-cam-may-anh-chuyen-nghiep-4.jpg"
+                      src={
+                        user?.avatar ||
+                        'https://media.istockphoto.com/id/1196083861/vi/vec-to/b%E1%BB%99-bi%E1%BB%83u-t%C6%B0%E1%BB%A3ng-%C4%91%E1%BA%A7u-ng%C6%B0%E1%BB%9Di-%C4%91%C3%A0n-%C3%B4ng-%C4%91%C6%A1n-gi%E1%BA%A3n.jpg?s=612x612&w=0&k=20&c=7juGotIovn0c2KFGhZ_DcEqpfiSyYl-zz2ty9XYnYNs='
+                      }
                       alt="avatar"
                     />
                     <div className="flex-1">
-                      <h3>Đà Nẵng</h3>
+                      <h3 className="font-medium">{user?.country}</h3>
                       <time className="text-sm text-gray-500">
-                        {new Date().toLocaleDateString()}
+                        {new Date(
+                          user?.createdAt?.seconds * 1000
+                        ).toLocaleDateString('vi-VI')}
                       </time>
                     </div>
                   </div>
                 </td>
-                <td>Status</td>
-                <td>Role</td>
+                <td>{userStatusLabel(user?.status)}</td>
+                <td>{userRoleLabel(user?.role)}</td>
                 <td>
                   <div className="flex items-center text-gray-500 gap-x-3">
-                    <ActionView
-                      onClick={() =>
-                        navigate(`/category/${user.slug}`)
-                      }></ActionView>
                     <ActionEdit
                       onClick={() =>
-                        navigate(`/manage/update-category?id=${user.id}`)
+                        navigate(`/manage/update-user?id=${user?.id}`)
                       }></ActionEdit>
                     <ActionDelete
-                      onClick={() => handleDeleteUser(user.id)}></ActionDelete>
+                      onClick={() => handleDeleteUser(user)}></ActionDelete>
                   </div>
                 </td>
               </tr>

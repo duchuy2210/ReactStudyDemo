@@ -25,7 +25,7 @@ const DashboardStyles = styled.div`
     }
   }
 `;
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = () => {
   //Bắt lỗi đăng nhập, đặp nhập mới truy cập được
   const {userInfo} = useAuth();
   if(!userInfo) return <NotFoundPage></NotFoundPage>

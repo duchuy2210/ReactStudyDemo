@@ -10,10 +10,11 @@ import { toast } from 'react-toastify';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from 'firebase-app/firebase-config';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import AuthenticationPage from './AuthenticationPage';
 import InputPasswordToggle from 'components/input/InputPasswordToggle';
 import slugify from 'slugify';
+import { userRole, userStatus } from 'utils/constants';
 
 const schema = yup.object({
   fullname: yup.string().required('Please enter your fullname'),
@@ -42,6 +43,7 @@ const SignUpPage = () => {
     await createUserWithEmailAndPassword(auth, values.email, values.password);
     await updateProfile(auth.currentUser, {
       displayName: values.fullname,
+      photoURL: '',
     });
     //Khi ghi dữ liệu lên db thì id user auth khác với id của document User nên dùng setDoc
     await setDoc(doc(db, 'users', auth.currentUser.uid), {
@@ -49,6 +51,11 @@ const SignUpPage = () => {
       email: values.email,
       password: values.password,
       username: slugify(values.fullname, { lower: true }),
+      avatar: '',
+      status: userStatus.ACTIVE,
+      role: userRole.USER,
+      country: 'Đà Nẵng',
+      createdAt: serverTimestamp(),
     });
     //dùng cách này sẽ sự auto id nên không giống với id user
     // await addDoc(colRef, {
