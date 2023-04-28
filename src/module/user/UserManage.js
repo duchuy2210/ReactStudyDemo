@@ -1,4 +1,4 @@
-import { ActionDelete, ActionEdit, ActionView } from 'components/action';
+import { ActionDelete, ActionEdit} from 'components/action';
 import { LabelStatus } from 'components/label';
 import { Table } from 'components/table';
 import { useAuth } from 'contexts/auth-context';

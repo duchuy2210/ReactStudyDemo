@@ -1,5 +1,4 @@
 import { useAuth } from "contexts/auth-context";
-import NotFoundPage from "pages/NotFoundPage";
 import SignInPage from "pages/SignInPage";
 import React from "react";
 import { Outlet } from "react-router-dom";

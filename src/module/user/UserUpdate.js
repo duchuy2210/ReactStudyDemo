@@ -37,7 +37,7 @@ const UserUpdate = () => {
     });
   };
 
-  const { image, setImage, progress, handleSelectImage, handleDeleteImage } =
+  const { image,progress, handleSelectImage, handleDeleteImage } =
     useFirebaseImage(setValue, getValues, deleteAvatar);
   const [params] = useSearchParams();
   const navigate = useNavigate();
