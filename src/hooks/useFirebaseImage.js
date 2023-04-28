@@ -12,7 +12,7 @@ import {
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-export default function useFirebaseImage(setValue, getValues) {
+export default function useFirebaseImage(setValue, getValues,cb) {
   //Tạo state để handle progress chạy upload ảnh
   const [progress, setProgress] = useState(0);
   //State khi upload xong thì hiện ảnh lên chổ label input
@@ -27,6 +27,8 @@ export default function useFirebaseImage(setValue, getValues) {
     if (!file) return;
     setValue('image_name', file.name);
     handleUploadImage(file);
+    //XỬ LÝ VIỆC KHI XOÁ ẢNH XONG ĐỒNG THỜI SET LẠI MẶC ĐỊNH CHO ẢNH BỊ XOÁ
+    cb && cb();
   };
 
   //Delete images
@@ -96,10 +98,11 @@ export default function useFirebaseImage(setValue, getValues) {
     setProgress(0);
   };
   return {
+    setImage,
     image,
     progress,
     handleSelectImage,
-     handleDeleteImage,
+    handleDeleteImage,
     handleResetImage,
   };
 }

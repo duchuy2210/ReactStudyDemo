@@ -27,6 +27,8 @@ const CategoryUpdate = () => {
     mode: 'onChange',
     //Khai báo giá trị ban đầu
   });
+
+  //LẤY DỮ LIỆU TỪ DB THEO ID
   useEffect(() => {
     async function fetchData() {
       const docRef = doc(db, 'categories', categoryId);

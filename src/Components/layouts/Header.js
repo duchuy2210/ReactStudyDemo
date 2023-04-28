@@ -77,7 +77,7 @@ const Header = () => {
     <HeaderStyle>
       <div className="container">
         <div className="header-main">
-          <div className="header-left">
+        <div className="header-left">
             <NavLink href="/">
               <img className="logo" srcSet="/img/logo.png 3x" alt="logo" />
             </NavLink>

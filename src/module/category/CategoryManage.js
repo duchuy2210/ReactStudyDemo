@@ -18,12 +18,14 @@ import {
 import DashboardHeading from 'module/dashboard/DashboardHeading';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { categoryStatus } from 'utils/constants';
+import { categoryStatus, userRole } from 'utils/constants';
 import { debounce } from 'lodash';
+import { useAuth } from 'contexts/auth-context';
 const CATEGORY_PER_PAGE = 2;
 
 const CategoryManage = () => {
   const navigate = useNavigate();
+  const { userInfo } = useAuth();
   const [categoryList, setCategoryList] = useState([]);
   const [total, setTotal] = useState(0);
   const [lastDoc, setLastDoc] = useState('');
@@ -32,14 +34,14 @@ const CategoryManage = () => {
   //LOAD MORE
   const handleLoadMoreCategory = async () => {
     const nextRef = query(
-      collection(db, "categories"),
+      collection(db, 'categories'),
       startAfter(lastDoc || 0),
       limit(CATEGORY_PER_PAGE)
     );
 
-    onSnapshot(nextRef, (snapshot) => {
+    onSnapshot(nextRef, snapshot => {
       let results = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         results.push({
           id: doc.id,
           ...doc.data(),
@@ -54,25 +56,25 @@ const CategoryManage = () => {
   };
   useEffect(() => {
     async function fetchData() {
-      const colRef = collection(db, "categories");
+      const colRef = collection(db, 'categories');
       const newRef = filter
         ? query(
             colRef,
-            where("name", ">=", filter),
-            where("name", "<=", filter + "utf8")
+            where('name', '>=', filter),
+            where('name', '<=', filter + 'utf8')
           )
         : query(colRef, limit(CATEGORY_PER_PAGE));
       const documentSnapshots = await getDocs(newRef);
       const lastVisible =
         documentSnapshots.docs[documentSnapshots.docs.length - 1];
 
-      onSnapshot(colRef, (snapshot) => {
+      onSnapshot(colRef, snapshot => {
         setTotal(snapshot.size);
       });
 
-      onSnapshot(newRef, (snapshot) => {
+      onSnapshot(newRef, snapshot => {
         let results = [];
-        snapshot.forEach((doc) => {
+        snapshot.forEach(doc => {
           results.push({
             id: doc.id,
             ...doc.data(),
@@ -156,14 +158,23 @@ const CategoryManage = () => {
                       onClick={() =>
                         navigate(`/category/${category.slug}`)
                       }></ActionView>
-                    <ActionEdit
-                      onClick={() =>
-                        navigate(`/manage/update-category?id=${category.id}`)
-                      }></ActionEdit>
-                    <ActionDelete
-                      onClick={() =>
-                        handleDeleteCategory(category.id)
-                      }></ActionDelete>
+                    {userInfo.role !== userRole.ADMIN ? (
+                      ''
+                    ) : (
+                      <>
+                        {' '}
+                        <ActionEdit
+                          onClick={() =>
+                            navigate(
+                              `/manage/update-category?id=${category.id}`
+                            )
+                          }></ActionEdit>
+                        <ActionDelete
+                          onClick={() =>
+                            handleDeleteCategory(category.id)
+                          }></ActionDelete>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -171,14 +182,14 @@ const CategoryManage = () => {
         </tbody>
       </Table>
       <div className="mt-10">
-      {/* CHECK HẾT DATA THÌ ẨN LOAD MORE */}
-      {total > categoryList.length && (
-        <div className="mt-10">
-          <Button onClick={handleLoadMoreCategory} className="mx-auto">
-            Load more
-          </Button>
-        </div>
-      )}
+        {/* CHECK HẾT DATA THÌ ẨN LOAD MORE */}
+        {total > categoryList.length && (
+          <div className="mt-10">
+            <Button onClick={handleLoadMoreCategory} className="mx-auto">
+              Load more
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

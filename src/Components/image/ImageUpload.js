@@ -1,19 +1,18 @@
-import React, { Fragment } from "react";
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-const ImageUpload = (props) => {
+const ImageUpload = props => {
   const {
     name,
-    className = "",
+    className = '',
     progress = 0,
-    image = "",
+    image = '',
     handleDeleteImage = () => {},
     ...rest
   } = props;
   return (
     <label
-      className={`cursor-pointer flex items-center justify-center border border-dashed w-full min-h-[200px] rounded-lg ${className} relative overflow-hidden group`}
-    >
+      className={`cursor-pointer flex items-center justify-center border border-dashed w-full min-h-[200px] rounded-lg ${className} relative overflow-hidden group`}>
       <input
         type="file"
         name={name}
@@ -40,16 +39,14 @@ const ImageUpload = (props) => {
           <button
             type="button"
             className="absolute z-10 flex items-center justify-center invisible w-16 h-16 text-red-500 transition-all bg-white rounded-full opacity-0 cursor-pointer group-hover:opacity-100 group-hover:visible"
-            onClick={handleDeleteImage}
-          >
+            onClick={handleDeleteImage}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-6 h-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth="2"
-            >
+              strokeWidth="2">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -64,8 +61,7 @@ const ImageUpload = (props) => {
           className="absolute bottom-0 left-0 w-10 h-1 transition-all bg-green-400 image-upload-progress"
           style={{
             width: `${Math.ceil(progress)}%`,
-          }}
-        ></div>
+          }}></div>
       )}
     </label>
   );

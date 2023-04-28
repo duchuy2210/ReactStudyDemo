@@ -3,32 +3,90 @@ import { Radio } from 'components/checkbox';
 import { Field, FieldCheckboxes } from 'components/field';
 import ImageUpload from 'components/image/ImageUpload';
 import { Input } from 'components/input';
+import InputPasswordToggle from 'components/input/InputPasswordToggle';
 import { Label } from 'components/label';
+import { db } from 'firebase-app/firebase-config';
+import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import useFirebaseImage from 'hooks/useFirebaseImage';
 import DashboardHeading from 'module/dashboard/DashboardHeading';
 import React from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { userRole, userStatus } from 'utils/constants';
 
 const UserUpdate = () => {
-  const { control, watch, formState:{isSubmitting} } = useForm({
+  const {
+    control,
+    watch,
+    reset,
+    setValue,
+    handleSubmit,
+    getValues,
+    formState: { isSubmitting, isValid },
+  } = useForm({
     mode: 'onChange',
   });
+
+  //XOÁ AVATAR KHI XOÁ ẢNH TRÊN FIREBASE
+  const deleteAvatar = async () => {
+    const colRef = doc(db, 'users', userId);
+    await updateDoc(colRef, {
+      avatar: '',
+    });
+  };
+
+  const { image, setImage, progress, handleSelectImage, handleDeleteImage } =
+    useFirebaseImage(setValue, getValues, deleteAvatar);
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const userId = params.get('id');
   const watchStatus = watch('status');
   const watchRole = watch('role');
+  const avatarUrl = getValues('avatar');
+
+  //LẤY DỮ LIỆU TỪ DB THEO ID
+  useEffect(() => {
+    async function fetchData() {
+      const docRef = doc(db, 'users', userId);
+      const singleDoc = await getDoc(docRef);
+      console.log('singleDoc:', singleDoc.data());
+      reset({ ...singleDoc.data() });
+    }
+    fetchData();
+  }, [userId, reset]);
+  if (!userId) return;
+
+  //HANDLE WHEN SUBMIT UPDATE DATA
+  const handleUpdateUser = async values => {
+    if (!isValid) return;
+    //XỬ LÝ DỮ LIỆU
+    const cloneValues = { ...values };
+    cloneValues.status = Number(cloneValues.status);
+    cloneValues.role = Number(cloneValues.role);
+    cloneValues.avatar = image;
+    const docRef = doc(db, 'users', userId);
+    await updateDoc(docRef, {
+      ...cloneValues,
+      updateAt: serverTimestamp(),
+    });
+    toast.success('Update category successfully');
+    navigate('/manage/user');
+  };
   return (
     <div>
       <DashboardHeading
         title="Update user"
         desc="Update user information"></DashboardHeading>
-      <form>
+      <form onSubmit={handleSubmit(handleUpdateUser)}>
         <div className="w-[200px] h-[200px] mx-auto rounded-full mb-10">
           <ImageUpload
             className="!rounded-full h-full"
-            // onChange={handleSelectImage}
-            // handleDeleteImage={handleDeleteImage}
-            // progress={progress}
-            // image={image}
-          ></ImageUpload>
+            onChange={handleSelectImage}
+            handleDeleteImage={handleDeleteImage}
+            progress={progress}
+            image={image || avatarUrl || ''}></ImageUpload>
         </div>
         <div className="form-layout">
           <Field>
@@ -57,11 +115,10 @@ const UserUpdate = () => {
           </Field>
           <Field>
             <Label>Password</Label>
-            <Input
+            <InputPasswordToggle
               name="password"
               placeholder="Enter your password"
-              control={control}
-              type="password"></Input>
+              control={control}></InputPasswordToggle>
           </Field>
         </div>
         <div className="form-layout">
